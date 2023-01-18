@@ -1,9 +1,13 @@
 package main
 
-import "github.com/meeron/go-cms/cms"
+import (
+	"log"
+
+	"github.com/meeron/go-cms/cms"
+)
 
 func main() {
 	cmsApp := cms.New()
 
-	cmsApp.Run()
+	log.Fatal(cmsApp.Run(":8080"))
 }

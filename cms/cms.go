@@ -1,11 +1,28 @@
 package cms
 
-type CmsApp struct{}
+import (
+	"log"
+	"net/http"
+)
 
-func (app *CmsApp) Run() error {
-	return nil
+var logger = log.Default()
+
+type CmsApp struct {
+	server *http.ServeMux
+}
+
+func (app *CmsApp) Run(addr string) error {
+	logger.Printf("Listening on %s ...\n", addr)
+	return http.ListenAndServe(addr, app.server)
 }
 
 func New() CmsApp {
-	return CmsApp{}
+	server := http.NewServeMux()
+
+	server.Handle("/admin", createAdminHandler())
+	server.Handle("/", createNodeHandler())
+
+	return CmsApp{
+		server,
+	}
 }
