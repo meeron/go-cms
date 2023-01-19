@@ -21,10 +21,14 @@ func (app *CmsApp) Run(addr string) error {
 	return http.ListenAndServe(addr, nil)
 }
 
-func New() CmsApp {
+func New(config *CmsConfig) CmsApp {
+	if err := config.validate(); err != nil {
+		log.Fatal(err)
+	}
+
 	router := mux.NewRouter()
 
-	configureAdmin(router)
+	configureAdmin(router, config)
 	configureNodes(router)
 
 	return CmsApp{

@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	cmsApp := cms.New()
+	cmsApp := cms.New(&cms.CmsConfig{})
 
 	log.Fatal(cmsApp.Run(":8080"))
 }
