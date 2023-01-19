@@ -3,14 +3,17 @@ package cms
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-type adminHandler struct{}
-
-func (h adminHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello from admin")
+func adminHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello from admin. Path %v", r.RequestURI)
 }
 
-func createAdminHandler() http.Handler {
-	return adminHandler{}
+func configureAdmin(router *mux.Router) {
+	r := router.PathPrefix("/admin").Subrouter()
+
+	r.HandleFunc("/", adminHandler).Methods(http.MethodGet)
+	r.HandleFunc("", adminHandler).Methods(http.MethodGet)
 }

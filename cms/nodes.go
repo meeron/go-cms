@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"strings"
 	"time"
-)
 
-type defaulNodeHandler struct{}
+	"github.com/gorilla/mux"
+)
 
 var sampleNodes = [3]string{"", "node", "child"}
 
-func (h defaulNodeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	statusCode := 404
 
@@ -34,6 +34,6 @@ func (h defaulNodeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Page not found")
 }
 
-func createNodeHandler() http.Handler {
-	return defaulNodeHandler{}
+func configureNodes(router *mux.Router) {
+	router.PathPrefix("/").HandlerFunc(defaultHandler)
 }

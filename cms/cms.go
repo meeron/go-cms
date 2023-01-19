@@ -3,26 +3,31 @@ package cms
 import (
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 var logger = log.Default()
 
 type CmsApp struct {
-	server *http.ServeMux
+	router *mux.Router
 }
 
 func (app *CmsApp) Run(addr string) error {
 	logger.Printf("Listening on %s ...\n", addr)
-	return http.ListenAndServe(addr, app.server)
+
+	http.Handle("/", app.router)
+
+	return http.ListenAndServe(addr, nil)
 }
 
 func New() CmsApp {
-	server := http.NewServeMux()
+	router := mux.NewRouter()
 
-	server.Handle("/admin", createAdminHandler())
-	server.Handle("/", createNodeHandler())
+	configureAdmin(router)
+	configureNodes(router)
 
 	return CmsApp{
-		server,
+		router,
 	}
 }
