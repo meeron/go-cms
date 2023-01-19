@@ -1,19 +1,42 @@
 package cms
 
 import (
+	"embed"
 	"fmt"
+	"html/template"
+	"io/fs"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
-func adminHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello from admin. Path %v", r.RequestURI)
+const AdminAppDir = "admin"
+const DefaultAdminUrl = "admin"
+
+//go:embed admin
+var adminEmbed embed.FS
+
+func adminIndexHandler(w http.ResponseWriter, r *http.Request) {
+	tpl, err := template.ParseFS(adminEmbed, fmt.Sprintf("%s/index.html", AdminAppDir))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	w.Header().Add("Content-Type", "text/html")
+	tpl.Execute(w, struct{}{})
 }
 
 func configureAdmin(router *mux.Router) {
-	r := router.PathPrefix("/admin").Subrouter()
+	r := router.PathPrefix("/" + DefaultAdminUrl).Subrouter()
 
-	r.HandleFunc("/", adminHandler).Methods(http.MethodGet)
-	r.HandleFunc("", adminHandler).Methods(http.MethodGet)
+	adminRootFs, err := fs.Sub(adminEmbed, AdminAppDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	adminStaticHandler := http.FileServer(http.FS(adminRootFs))
+
+	r.HandleFunc("/", adminIndexHandler).Methods(http.MethodGet)
+	r.HandleFunc("", adminIndexHandler).Methods(http.MethodGet)
+	r.PathPrefix("/").Handler(http.StripPrefix(fmt.Sprintf("/%s/", DefaultAdminUrl), adminStaticHandler))
 }
